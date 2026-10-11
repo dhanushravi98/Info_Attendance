@@ -18,3 +18,9 @@ export function getOrigin() {
   if (!origin) throw new Error("Missing WEBAUTHN_ORIGIN");
   return origin;
 }
+
+// Check-in challenges are short-lived: scan, Face ID, done.
+export const CHECKIN_CHALLENGE_MAX_AGE_MS = 2 * 60 * 1000;
+
+// A second check-in at the same location within this window is ignored.
+export const DUPLICATE_CHECKIN_WINDOW_MS = 2 * 60 * 1000;

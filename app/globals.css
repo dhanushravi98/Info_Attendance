@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Printed pages (e.g. the location QR codes) are always black on white,
+   even if the device is in dark mode. */
+@media print {
+  :root {
+    --background: #ffffff;
+    --foreground: #000000;
+  }
+  @page {
+    margin: 1.5cm;
+  }
+}

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DeviceSetup } from "./device-setup";
+import { RecentCheckIns } from "./recent-check-ins";
+import { CheckIn } from "./check-in";
 import { SignOutButton } from "./sign-out-button";
 
 export default function DashboardPage() {
@@ -65,6 +67,12 @@ async function Profile() {
       </div>
 
       <DeviceSetup deviceCount={count ?? 0} />
+
+      <CheckIn hasDevice={(count ?? 0) > 0} />
+
+      <Suspense fallback={<HistorySkeleton />}>
+        <RecentCheckIns userId={user.id} />
+      </Suspense>
     </div>
   );
 }
@@ -72,5 +80,11 @@ async function Profile() {
 function ProfileSkeleton() {
   return (
     <div className="h-[116px] animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-800" />
+  );
+}
+
+function HistorySkeleton() {
+  return (
+    <div className="h-40 animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-800" />
   );
 }

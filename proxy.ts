@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // Next.js 16 calls this "proxy" (formerly "middleware").
 // It runs before every matched request to:
 //   1. refresh the Supabase session cookie so the login persists, and
-//   2. send signed-out users away from /dashboard.
+//   2. send signed-out users away from /dashboard and /admin.
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -42,7 +42,10 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  if (!isSignedIn && path.startsWith("/dashboard")) {
+  if (
+    !isSignedIn &&
+    (path.startsWith("/dashboard") || path.startsWith("/admin"))
+  ) {
     return redirectWithCookies(request, response, "/login");
   }
 
