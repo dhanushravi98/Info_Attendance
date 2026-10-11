@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { DeviceSetup } from "./device-setup";
 import { SignOutButton } from "./sign-out-button";
 
 export default function DashboardPage() {
@@ -46,13 +48,23 @@ async function Profile() {
     );
   }
 
+  // The admin client bypasses RLS, so filter by the verified user's id.
+  const { count } = await createAdminClient()
+    .from("webauthn_credentials")
+    .select("id", { count: "exact", head: true })
+    .eq("employee_id", user.id);
+
   return (
-    <div className="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800">
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">Signed in as</p>
-      <p className="mt-1 text-2xl font-semibold">{employee.full_name}</p>
-      <p className="mt-1 break-all text-zinc-600 dark:text-zinc-400">
-        {employee.email}
-      </p>
+    <div className="flex flex-col gap-6">
+      <div className="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Signed in as</p>
+        <p className="mt-1 text-2xl font-semibold">{employee.full_name}</p>
+        <p className="mt-1 break-all text-zinc-600 dark:text-zinc-400">
+          {employee.email}
+        </p>
+      </div>
+
+      <DeviceSetup deviceCount={count ?? 0} />
     </div>
   );
 }
