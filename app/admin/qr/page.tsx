@@ -1,9 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
 import QRCode from "qrcode";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/admin";
 import { PrintButton } from "./print-button";
 
 export const metadata: Metadata = {
@@ -24,30 +23,10 @@ export default function AdminQrPage() {
 }
 
 async function LocationCodes() {
-  const supabase = await createClient();
+  // Signed out -> /login, not an admin -> 404. Runs BEFORE any qr_code is read.
+  await requireAdmin();
 
-  // getUser() checks the session with Supabase Auth, so it can be trusted.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
-  }
-
-  // The admin client bypasses RLS, so filter by the verified user's id.
   const admin = createAdminClient();
-  const { data: employee } = await admin
-    .from("employees")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  // Non-admins get a plain 404, so the page doesn't even admit it exists.
-  // This check runs BEFORE any qr_code is read.
-  if (employee?.role !== "admin") {
-    notFound();
-  }
-
   const { data: locations, error } = await admin
     .from("locations")
     .select("id, name, qr_code")
